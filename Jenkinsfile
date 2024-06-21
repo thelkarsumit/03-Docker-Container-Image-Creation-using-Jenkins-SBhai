@@ -1,36 +1,53 @@
 pipeline {
     agent any
+    tools {
+        maven 'Maven'
+    }
+    environment {
+        SCANNER_HOME=tool 'SonarQube-Scanner'
+    }
     stages {
+        stage('sonarqube-analysis') {
+            steps {
+                withSonarQubeEnv('SonarQube-server') {
+                 sh 'mvn clean verify sonar:sonar \
+                     -Dsonar.projectKey=03-Docker-Container-Shrameshwar-code \
+                     -Dsonar.host.url=http://35.228.202.17:9000 \
+                     -Dsonar.login=sqp_db2b1db52107b66b7f02e602eb3b94fd5f7e51af'
+                }
+            }
+        }
         stage('Build') {
             steps {
-                // Use Maven to build the application
+                // Define steps for the Build stage
+                echo 'Building the project...'
                 sh 'mvn clean package'
             }
         }
-        stage('sonarqube-analysis') {
-           steps {
-               // Perform SonarQube analysis
-               withSonarQubeEnv('sonar-server') {
-                   sh 'mvn clean verify sonar:sonar \
-                       -Dsonar.projectKey=03-Docker-Container \
-                       -Dsonar.host.url=http://35.228.202.17:9000 \
-                       -Dsonar.login=sqp_e99f09f4ef01a6da391d903b0a9dd127ffa058aa'
-               }
-             }
-        }
-        stage('Docker Build') {
+        stage('Test') {
             steps {
-                // Build the Docker image
-                script {
-                 dockerImage = docker.build("hello-world:latest")
-                }
+                // Define steps for the Test stage
+                echo 'Running tests...'
+                sh 'mvn test'
             }
         }
     }
     post {
-        always {
-            // Clean up the workspace
-            cleanWs()
+        success {
+            // Actions to take if the pipeline succeeds
+            echo 'Pipeline succeeded!'
+            // You can also send an email notification on success
+            mail to: 'thelkarsc@gmail.com',
+                 subject: "Pipeline Succeeded: ${currentBuild.fullDisplayName}",
+                 body: "The pipeline ${env.BUILD_URL} has successfully completed."
+        }
+        failure {
+            // Actions to take if the pipeline fails
+            echo 'Pipeline failed!'
+            // You can also send an email notification on failure
+            mail to: 'thelkarsc@gmail.com',
+                 subject: "Pipeline Failed: ${currentBuild.fullDisplayName}",
+                 body: "The pipeline ${env.BUILD_URL} has failed. Check the logs for details."
         }
     }
 }
