@@ -11,9 +11,9 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQube-server') {
                  sh 'mvn clean verify sonar:sonar \
-                    -Dsonar.projectKey=01-Pipeline-GitRepo-01-Pipeline-GitRepo \
-                    -Dsonar.host.url=http://34.68.98.99:9000 \
-                    -Dsonar.login=sqp_a20b535924d1a7a684413560920455073147c089'
+                     -Dsonar.projectKey=01-Pipeline-GitRepo-01-Pipeline-GitRepo \
+                     -Dsonar.host.url=http://34.171.70.137:9000 \
+                     -Dsonar.login=sqp_0d7410a590afbba50ee51c79895b2649cb9c41fe'
                 }
             }
         }
